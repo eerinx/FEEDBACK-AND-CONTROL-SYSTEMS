@@ -1,9 +1,12 @@
 faiss-cpu
 langchain
 langchain-community
+langchain-huggingface
 langchain-openai
 langchain-text-splitters
+langchain-classic
 langgraph
 pypdf
 python-docx
+sentence-transformers
 wikipedia
