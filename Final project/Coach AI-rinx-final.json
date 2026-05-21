@@ -1,0 +1,1736 @@
+{
+  "name": "Coach AI-rinx-V2-Voice",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        96
+      ],
+      "id": "35507ade-ee8b-44be-b51a-f43b629da64e",
+      "name": "Telegram Trigger",
+      "webhookId": "51df99c8-2003-4890-afcd-4fd37d4fb126",
+      "credentials": {
+        "telegramApi": {
+          "id": "KVVVGpNb41kqXFcO",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=🔥 NEW PR DETECTED!\n\n🏋️ Exercise: {{ $('Edit Fields').item.json.exercise }}\n⚖️ New Record: {{ $('Edit Fields').item.json.weight }}\n🔁 Reps: {{ $('Edit Fields').item.json.reps }}\n📚 Sets: {{ $('Edit Fields').item.json.sets }}\n📊 Volume: {{ $('Edit Fields').item.json.volume }}\n\n💪 Keep pushing!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1568,
+        0
+      ],
+      "id": "2f13530d-d9a7-479f-9e44-fb6af53f05b8",
+      "name": "Send a text message",
+      "webhookId": "4731fd75-fbc1-44c3-9d85-2e2df49b77b8",
+      "credentials": {
+        "telegramApi": {
+          "id": "KVVVGpNb41kqXFcO",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "AIzaSyBFEg_wnF5Qe3EN1A_32xfe3_qBgy1TnIk"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"Convert the following workout message into ONE valid raw JSON object.\\n\\nRules:\\n- Return ONLY JSON\\n- No markdown\\n- No explanation\\n- No arrays\\n- No extra text\\n- Keep values exactly as written\\n\\nRequired format:\\n{\\\"exercise\\\":\\\"\\\",\\\"weight\\\":\\\"\\\",\\\"reps\\\":\\\"\\\"}\\n\\nWorkout message:\\n{{ $('Telegram Trigger').item.json.message.text }}\"\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        96
+      ],
+      "id": "483b97fb-a1ee-45d9-9bfe-5ae4ceb17891",
+      "name": "HTTP Request",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c2734cd5-a3a1-4988-ae2a-fcc843f328dc",
+              "name": "exercise",
+              "value": "={{ $json.message.text.split('|')[0].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "c48149b9-4aee-4a3b-b926-e91224bfa0dc",
+              "name": "weight",
+              "value": "={{ $json.message.text.split('|')[1].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "6a49396e-936b-41a3-a061-a03bb68694ff",
+              "name": "reps",
+              "value": "={{ $json.message.text.split('|')[2].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "a7cddad7-de6f-4b9f-adf1-fd04cb8a2676",
+              "name": "sets",
+              "value": "={{ $json.message.text.split('|')[3].trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "5ef59030-5767-408e-845d-5f61f3e94f16",
+              "name": "volume",
+              "value": "={{  ( parseFloat($json.message.text.split('|')[1]) * parseFloat($json.message.text.split('|')[2]) * parseFloat($json.message.text.split('|')[3]) ) }}",
+              "type": "string"
+            },
+            {
+              "id": "fa02fd63-17c5-4ec2-802a-9ebe904744e4",
+              "name": "category",
+              "value": "={{ (() => {  const exercise = $json.message.text .split('|')[0] .trim() .toLowerCase();  const upper = [ 'inclined', 'pec deck', 'machine row', 'cable pulldown', 'lateral raise', 'shoulder press' ];  const arms = [ 'overhead tricep', 'tricep pushdown', 'preacher curl', 'arm', 'curl', 'tricep' ];  const core = [ 'cable crunch', 'crunch', 'plank', 'situp' ];  if (upper.some(e => exercise.includes(e))) {   return 'upper'; }  if (arms.some(e => exercise.includes(e))) {   return 'arms'; }  if (core.some(e => exercise.includes(e))) {   return 'core'; }  return 'unknown';  })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        96
+      ],
+      "id": "f91184a3-c9f8-4079-861a-5546cac4153c",
+      "name": "Edit Fields",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1HIAfaUXWilmn1nkZSERcFykwvOIjfcVho6r1PssLZRI",
+          "mode": "list",
+          "cachedResultName": "Coach AI-erinx",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HIAfaUXWilmn1nkZSERcFykwvOIjfcVho6r1PssLZRI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HIAfaUXWilmn1nkZSERcFykwvOIjfcVho6r1PssLZRI/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        96
+      ],
+      "id": "d590dfcf-c4fb-4bd9-b0b2-b9aa145c8023",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LTxXRSJawEseaMEc",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const currentWeight = parseFloat(\n  $('Edit Fields').item.json.weight.replace(/[^\\d.]/g, '')\n);\n\nlet maxWeight = 0;\n\n// If no previous rows exist\nif (items.length === 0) {\n  return [\n    {\n      json: {\n        currentWeight,\n        maxWeight: 0,\n        isPR: true\n      }\n    }\n  ];\n}\n\n// Check historical rows\nfor (const item of items) {\n\n  if (!item.json.Weight) continue;\n\n  const weight = parseFloat(\n    item.json.Weight.toString().replace(/[^\\d.]/g, '')\n  );\n\n  if (!isNaN(weight) && weight > maxWeight) {\n    maxWeight = weight;\n  }\n}\n\nreturn [\n  {\n    json: {\n      currentWeight,\n      maxWeight,\n      isPR: currentWeight > maxWeight\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        96
+      ],
+      "id": "9ce41025-c5a5-4a44-834b-daadd3237847",
+      "name": "Code in JavaScript",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3fa38ef3-d5c3-48f3-ba10-3bde182e0665",
+              "leftValue": "={{ $json.isPR }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "6b2f4d36-a156-4afb-a71d-8f9ba5a9aab0",
+      "name": "If",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1HIAfaUXWilmn1nkZSERcFykwvOIjfcVho6r1PssLZRI",
+          "mode": "list",
+          "cachedResultName": "Coach AI-erinx",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HIAfaUXWilmn1nkZSERcFykwvOIjfcVho6r1PssLZRI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HIAfaUXWilmn1nkZSERcFykwvOIjfcVho6r1PssLZRI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $now }}",
+            "Exercise": "={{ $('Edit Fields').item.json.exercise }}",
+            "Weight": "={{ $('Edit Fields').item.json.weight }}",
+            "Reps": "={{ $('Edit Fields').item.json.reps }}",
+            "Sets": "={{ $('Edit Fields').item.json.sets }}",
+            "Volume": "={{ $('Edit Fields').item.json.volume }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Exercise",
+              "displayName": "Exercise",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Weight",
+              "displayName": "Weight",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reps",
+              "displayName": "Reps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sets",
+              "displayName": "Sets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Volume",
+              "displayName": "Volume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1344,
+        0
+      ],
+      "id": "0c251f99-1e4a-4d98-bc15-c333ab5f5f80",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LTxXRSJawEseaMEc",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=✅ Workout Logged\n\n🏋️ Exercise: {{ $('Edit Fields').item.json.exercise }}\n⚖️ Weight: {{ $('Edit Fields').item.json.weight }}\n🔁 Reps: {{ $('Edit Fields').item.json.reps }}\n📚 Sets: {{ $('Edit Fields').item.json.sets }}\n📊 Volume: {{ $('Edit Fields').item.json.volume }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1568,
+        192
+      ],
+      "id": "b77f0adf-2d77-4a28-b8f0-9b360bef5147",
+      "name": "Send a text message1",
+      "webhookId": "4731fd75-fbc1-44c3-9d85-2e2df49b77b8",
+      "credentials": {
+        "telegramApi": {
+          "id": "KVVVGpNb41kqXFcO",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1HIAfaUXWilmn1nkZSERcFykwvOIjfcVho6r1PssLZRI",
+          "mode": "list",
+          "cachedResultName": "Coach AI-erinx",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HIAfaUXWilmn1nkZSERcFykwvOIjfcVho6r1PssLZRI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HIAfaUXWilmn1nkZSERcFykwvOIjfcVho6r1PssLZRI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $now }}",
+            "Exercise": "={{ $('Edit Fields').item.json.exercise }}",
+            "Weight": "={{ $('Edit Fields').item.json.weight }}",
+            "Reps": "={{ $('Edit Fields').item.json.reps }}",
+            "Sets": "={{ $('Edit Fields').item.json.sets }}",
+            "Volume": "={{ $('Edit Fields').item.json.volume }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Exercise",
+              "displayName": "Exercise",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Weight",
+              "displayName": "Weight",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reps",
+              "displayName": "Reps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sets",
+              "displayName": "Sets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Volume",
+              "displayName": "Volume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1344,
+        192
+      ],
+      "id": "d61f8357-28bf-46ba-81bd-c6af6a936dfb",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LTxXRSJawEseaMEc",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        528
+      ],
+      "id": "911cd97e-6098-4548-9e7e-278469dc6e80",
+      "name": "Telegram Trigger1",
+      "webhookId": "51df99c8-2003-4890-afcd-4fd37d4fb126",
+      "credentials": {
+        "telegramApi": {
+          "id": "KVVVGpNb41kqXFcO",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3fa38ef3-d5c3-48f3-ba10-3bde182e0665",
+              "leftValue": "={{ $json.message.voice.file_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        528
+      ],
+      "id": "940e509a-c88e-40bd-9d92-a4b9e407582c",
+      "name": "If1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        528
+      ],
+      "id": "42257619-18bf-43b4-a6d0-3970ae1f542c",
+      "name": "Get a file",
+      "webhookId": "059828b9-ebed-4ee2-8d31-b43f0bc5d607",
+      "credentials": {
+        "telegramApi": {
+          "id": "KVVVGpNb41kqXFcO",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/file/bot8460254567:AAGS4lCGTE2DfOBFUbnWB1SIVvvPGYivDQY/{{$json.result.file_path}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        656,
+        528
+      ],
+      "id": "ea1dccc9-4469-4c7d-94ec-ad7b07966d13",
+      "name": "HTTP Request1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5000/transcribe",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        880,
+        528
+      ],
+      "id": "742ed81f-7e25-4c47-a174-9f0d48a34480",
+      "name": "HTTP Request2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const text = $json.text.toLowerCase();\n\nconst weightMatch = text.match(/(\\d+)\\s*kg/i);\nconst repsMatch = text.match(/(\\d+)\\s*reps?/i);\nconst setsMatch = text.match(/(\\d+)\\s*sets?/i);\n\nlet exercise = text\n  .replace(/(\\d+)\\s*kg/i, '')\n  .replace(/(\\d+)\\s*reps?/i, '')\n  .replace(/(\\d+)\\s*sets?/i, '')\n  .trim();\n\nreturn {\n  raw_text: text,\n  exercise: exercise,\n  weight: weightMatch ? parseInt(weightMatch[1]) : null,\n  reps: repsMatch ? parseInt(repsMatch[1]) : null,\n  sets: setsMatch ? parseInt(setsMatch[1]) : null\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        528
+      ],
+      "id": "dfe9c1c3-c0b7-4c80-8c0c-043e8b870a2b",
+      "name": "Code in JavaScript1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const exercise = $json.exercise.toLowerCase();\n\nlet category = \"unknown\";\n\nconst upper = [\n  \"inclined\",\n  \"bench\",\n  \"pec deck\",\n  \"machine row\",\n  \"cable pulldown\",\n  \"shoulder press\"\n];\n\nconst lower = [\n  \"squat\",\n  \"leg press\",\n  \"leg curl\",\n  \"calf raise\"\n];\n\nconst arms = [\n  \"bicep curl\",\n  \"tricep pushdown\",\n  \"preacher curl\"\n];\n\nconst core = [\n  \"crunch\",\n  \"cable crunch\",\n  \"plank\"\n];\n\nif (upper.some(e => exercise.includes(e))) {\n  category = \"upper\";\n}\n\nelse if (lower.some(e => exercise.includes(e))) {\n  category = \"lower\";\n}\n\nelse if (arms.some(e => exercise.includes(e))) {\n  category = \"arms\";\n}\n\nelse if (core.some(e => exercise.includes(e))) {\n  category = \"core\";\n}\n\nreturn {\n  ...$json,\n  category\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        528
+      ],
+      "id": "4908bdeb-d18f-4055-9b0c-1a11ca0665ab",
+      "name": "Code in JavaScript2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const volume =\n  $json.weight *\n  $json.reps *\n  $json.sets;\n\nreturn {\n  ...$json,\n  volume\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        528
+      ],
+      "id": "bfadafd1-c735-4311-b439-0ed05aea9550",
+      "name": "Code in JavaScript3",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ",
+          "mode": "list",
+          "cachedResultName": "AI workout tracking system by erinx",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $now }}",
+            "Exercise": "={{ $json.exercise }}",
+            "Weight": "={{ $json.weight }}",
+            "Reps": "={{ $json.reps }}",
+            "Sets": "={{ $json.sets }}",
+            "Volume": "={{ $json.volume }}",
+            "Category": "={{ $json.category }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Exercise",
+              "displayName": "Exercise",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Weight",
+              "displayName": "Weight",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reps",
+              "displayName": "Reps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sets",
+              "displayName": "Sets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Volume",
+              "displayName": "Volume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2224,
+        528
+      ],
+      "id": "906c6703-4f3c-491e-9ab4-242872a96fff",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LTxXRSJawEseaMEc",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "={{ $json.candidates[0].content.parts[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2672,
+        528
+      ],
+      "id": "708ef760-ecfd-4392-b7b9-b7fe3cd503b5",
+      "name": "Send a text message2",
+      "webhookId": "ff8ebee6-d7a4-47fb-b65c-d7085c1ba624",
+      "credentials": {
+        "telegramApi": {
+          "id": "KVVVGpNb41kqXFcO",
+          "name": "Telegram account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "AIzaSyD297CoutZvVA53nbZaD9h-gdHdpVpe9eg"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are an AI fitness coach. Give concise, highly enthusiastic, and motivational gym feedback in under 3 sentences. Keep the vibe bright and energetic with vibrant fitness/hype emojis (💪, 🔥, 🏋️‍♂️, ⚡, ✨). You must explicitly mention the exercise name, weight, and volume.\\n\\n\" + \n          \"CRITICAL CONTEXT:\\n\" +\n          (\n            $json.prStatus === \"weight_pr\" ? \"🚨 ALERT: The user just set a brand new PERSONAL RECORD for weight on this exercise! Go absolutely crazy celebrating this milestone! Previous best was \" + $json.previousMaxWeight + \"kg.\" :\n            $json.prStatus === \"volume_pr\" ? \"🚨 ALERT: The user just achieved a total VOLUME PERSONAL RECORD! Match that insane work capacity with huge energy! Previous volume max was \" + $json.previousMaxVolume + \".\" :\n            $json.prStatus === \"double_pr\" ? \"🚨 ALERT: HOLY SMOKES! Double Personal Record! They beat their max weight AND max volume all in one workout! Turn the hype up to 1000%!\" :\n            $json.prStatus === \"initial\" ? \"This is the first time they are logging this movement. Encourage them for establishing a baseline!\" : \n            \"Standard workout completed. Keep them motivated to hit their targets.\"\n          ) + \n          \"\\n\\nExercise: \" + $json.Exercise + \"\\nWeight: \" + $json.Weight + \"kg\\nVolume: \" + $json.Volume\n        }\n      ]\n    }\n  ]\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2448,
+        528
+      ],
+      "id": "e57e82e5-f57a-4efc-8652-92cc24183f4a",
+      "name": "HTTP Request3",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ",
+          "mode": "list",
+          "cachedResultName": "AI workout tracking system by erinx",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Exercise",
+              "lookupValue": "={{ $json.exercise }}"
+            }
+          ]
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "detectAutomatically"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1776,
+        528
+      ],
+      "id": "e272ff87-bd60-4ef5-8d84-e9fa2a845a39",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LTxXRSJawEseaMEc",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Grab the current incoming workout stats\n// Note: Changed to capital letters to match your Google Sheet properties!\nconst currentExercise = $json.Exercise || $json.exercise;\nconst currentWeight = parseFloat($json.Weight || 0);\nconst currentVolume = parseFloat($json.Volume || 0);\n\nlet maxWeightHistory = 0;\nlet maxVolumeHistory = 0;\n\n// 2. Safely look up previous history items\nlet historyItems = [];\ntry {\n  // This safely grabs data from the node right before this one\n  historyItems = $items(); \n  \n  // NOTE: If your Google Sheets node has a specific name like \"Google Sheets\", \n  // you can uncomment the line below and change it to match your exact node name:\n  // historyItems = $items(\"Google Sheets\");\n} catch (e) {\n  historyItems = [];\n}\n\n// 3. Loop through history if any past rows exist\nif (Array.isArray(historyItems) && historyItems.length > 0) {\n  for (const item of historyItems) {\n    // Make sure we only check history matching this exact exercise\n    const pastExercise = item.json.Exercise || item.json.exercise;\n    if (pastExercise === currentExercise) {\n      const pastWeight = parseFloat(item.json.Weight || 0);\n      const pastVolume = parseFloat(item.json.Volume || 0);\n      \n      if (pastWeight > maxWeightHistory) maxWeightHistory = pastWeight;\n      if (pastVolume > maxVolumeHistory) maxVolumeHistory = pastVolume;\n    }\n  }\n}\n\n// 4. Determine if the current workout breaks either record\nconst isWeightPR = currentWeight > maxWeightHistory && maxWeightHistory > 0;\nconst isVolumePR = currentVolume > maxVolumeHistory && maxVolumeHistory > 0;\nconst isFirstTime = maxWeightHistory === 0; \n\nlet prStatus = \"none\";\nif (isFirstTime) prStatus = \"initial\";\nelse if (isWeightPR && isVolumePR) prStatus = \"double_pr\";\nelse if (isWeightPR) prStatus = \"weight_pr\";\nelse if (isVolumePR) prStatus = \"volume_pr\";\n\n// 5. Forward everything downstream safely\nreturn {\n  ...$json,\n  prStatus: prStatus,\n  previousMaxWeight: maxWeightHistory,\n  previousMaxVolume: maxVolumeHistory\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        528
+      ],
+      "id": "2ade8cc8-4bc2-4d28-bd5f-a63d86080bcc",
+      "name": "Code in JavaScript4",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -16,
+        1344
+      ],
+      "id": "abc388d1-dee5-4854-a067-122dcfb456a0",
+      "name": "Telegram Trigger2",
+      "webhookId": "51df99c8-2003-4890-afcd-4fd37d4fb126",
+      "credentials": {
+        "telegramApi": {
+          "id": "KVVVGpNb41kqXFcO",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3fa38ef3-d5c3-48f3-ba10-3bde182e0665",
+              "leftValue": "={{ $json.message.voice.file_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        1344
+      ],
+      "id": "4c919188-b34c-4267-8b8b-ebf24fc2d23f",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        1040
+      ],
+      "id": "55ee80b7-8433-4b7a-81b5-23845550566f",
+      "name": "Get a file1",
+      "webhookId": "059828b9-ebed-4ee2-8d31-b43f0bc5d607",
+      "credentials": {
+        "telegramApi": {
+          "id": "KVVVGpNb41kqXFcO",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/file/bot8460254567:AAGS4lCGTE2DfOBFUbnWB1SIVvvPGYivDQY/{{$json.result.file_path}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1008,
+        1040
+      ],
+      "id": "98d5e772-4138-4fff-a319-198603fb0134",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5000/transcribe",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1232,
+        1040
+      ],
+      "id": "03b1ace5-c000-4504-83f9-0f3282710256",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ",
+          "mode": "list",
+          "cachedResultName": "AI workout tracking system by erinx",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $now }}",
+            "Exercise": "={{ $('Code in JavaScript8').item.json.Exercise }}",
+            "Weight": "={{ $('Code in JavaScript8').item.json.Weight }}",
+            "Reps": "={{ $('Code in JavaScript8').item.json.Reps }}",
+            "Sets": "={{ $('Code in JavaScript8').item.json.Sets }}",
+            "Volume": "={{ $('Code in JavaScript8').item.json.Volume }}",
+            "Category": "={{ $('Code in JavaScript8').item.json.Category }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Exercise",
+              "displayName": "Exercise",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Weight",
+              "displayName": "Weight",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reps",
+              "displayName": "Reps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sets",
+              "displayName": "Sets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Volume",
+              "displayName": "Volume",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        1264
+      ],
+      "id": "f02dde82-3ed3-4039-b6cc-8469261337cc",
+      "name": "Append row in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LTxXRSJawEseaMEc",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger2').item.json.message.chat.id }}",
+        "text": "={{ $json.candidates[0].content.parts[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1584,
+        1264
+      ],
+      "id": "2603b72f-7ab0-47bc-8794-67225cdf6a6a",
+      "name": "Send a text message3",
+      "webhookId": "ff8ebee6-d7a4-47fb-b65c-d7085c1ba624",
+      "credentials": {
+        "telegramApi": {
+          "id": "KVVVGpNb41kqXFcO",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "AIzaSyDfUzs6td2Fmjp5KUxn8M0k7dQXtoNCTDk"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are an AI fitness coach. Give concise, highly enthusiastic, and motivational gym feedback in under 3 sentences. Keep the vibe bright and energetic with vibrant fitness/hype emojis (💪, 🔥, 🏋️‍♂️, ⚡, ✨). You must explicitly mention the exercise name, weight, and volume.\\n\\n\" + \n          \"CRITICAL CONTEXT:\\n\" +\n          (\n            $('Code in JavaScript8').item.json.prStatus === \"weight_pr\" ? \"🚨 ALERT: The user just set a brand new PERSONAL RECORD for weight on this exercise! Go absolutely crazy celebrating this milestone! Previous best was \" + $('Code in JavaScript8').item.json.previousMaxWeight + \"kg.\" :\n            $('Code in JavaScript8').item.json.prStatus === \"volume_pr\" ? \"🚨 ALERT: The user just achieved a total VOLUME PERSONAL RECORD! Match that insane work capacity with huge energy! Previous volume max was \" + $('Code in JavaScript8').item.json.previousMaxVolume + \".\" :\n            $('Code in JavaScript8').item.json.prStatus === \"double_pr\" ? \"🚨 ALERT: HOLY SMOKES! Double Personal Record! They beat their max weight AND max volume all in one workout! Turn the hype up to 1000%!\" :\n            $('Code in JavaScript8').item.json.prStatus === \"initial\" ? \"This is the first time they are logging this movement. Encourage them for establishing a baseline!\" : \n            \"Standard workout completed. Keep them motivated to hit their targets.\"\n          ) + \n          \"\\n\\nExercise: \" + $('Code in JavaScript8').item.json.Exercise + \"\\nWeight: \" + $('Code in JavaScript8').item.json.Weight + \"kg\\nVolume: \" + $('Code in JavaScript8').item.json.Volume\n        }\n      ]\n    }\n  ]\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1328,
+        1264
+      ],
+      "id": "aa7a7d6a-9c2b-492f-b23e-d7346e5c9ace",
+      "name": "HTTP Request6"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ",
+          "mode": "list",
+          "cachedResultName": "AI workout tracking system by erinx",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Exercise",
+              "lookupValue": "={{ $json.Exercise }}"
+            }
+          ]
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "detectAutomatically"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        1264
+      ],
+      "id": "de1aa93a-2d97-4f2f-99ed-6afc47297549",
+      "name": "Get row(s) in sheet2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LTxXRSJawEseaMEc",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Explicitly pull CURRENT workout stats from your JSON Parser node\nconst currentExercise = $('Code in JavaScript9').item.json.Exercise || \"Unknown Exercise\";\nconst currentWeight = parseFloat($('Code in JavaScript9').item.json.Weight || 0);\nconst currentVolume = parseFloat($('Code in JavaScript9').item.json.Volume || 0);\nconst currentReps = parseInt($('Code in JavaScript9').item.json.Reps || 0);\nconst currentSets = parseInt($('Code in JavaScript9').item.json.Sets || 0);\nconst currentCategory = $('Code in JavaScript9').item.json.Category || \"unknown\";\n\nlet maxWeightHistory = 0;\nlet maxVolumeHistory = 0;\nlet foundAnyHistory = false;\n\n// 2. Pull PREVIOUS history entries safely from the Google Sheets node output\nlet historyItems = [];\ntry {\n  historyItems = $items(); \n} catch (e) {\n  historyItems = [];\n}\n\n// 3. Loop through ALL history entries and match against the current exercise\nif (Array.isArray(historyItems) && historyItems.length > 0) {\n  for (const item of historyItems) {\n    // Check both potential casings from Google Sheets columns\n    const pastExercise = item.json.Exercise || item.json.exercise;\n    \n    // Only look at rows that match the exercise we are doing right now\n    if (pastExercise && String(pastExercise).trim().toLowerCase() === currentExercise.trim().toLowerCase()) {\n      foundAnyHistory = true;\n      const pastWeight = parseFloat(item.json.Weight || 0);\n      const pastVolume = parseFloat(item.json.Volume || 0);\n      \n      if (pastWeight > maxWeightHistory) maxWeightHistory = pastWeight;\n      if (pastVolume > maxVolumeHistory) maxVolumeHistory = pastVolume;\n    }\n  }\n}\n\n// 4. Determine PR Milestone status accurately\nconst isWeightPR = currentWeight > maxWeightHistory && maxWeightHistory > 0;\nconst isVolumePR = currentVolume > maxVolumeHistory && maxVolumeHistory > 0;\n\n// It's only the initial baseline if absolutely no previous history matches this specific movement name\nconst isFirstTime = !foundAnyHistory; \n\nlet prStatus = \"none\";\nif (isFirstTime) prStatus = \"initial\";\nelse if (isWeightPR && isVolumePR) prStatus = \"double_pr\";\nelse if (isWeightPR) prStatus = \"weight_pr\";\nelse if (isVolumePR) prStatus = \"volume_pr\";\n\n// 5. Send clean payload out to Google Sheet Appender and Gemini\nreturn {\n  Exercise: currentExercise,\n  Weight: currentWeight,\n  Reps: currentReps,\n  Sets: currentSets,\n  Volume: currentVolume,\n  Category: currentCategory,\n  prStatus: prStatus,\n  previousMaxWeight: maxWeightHistory,\n  previousMaxVolume: maxVolumeHistory\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        1264
+      ],
+      "id": "a64db7cf-587c-4acf-9b8d-f65cdde6f7fb",
+      "name": "Code in JavaScript8"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "AIzaSyDfUzs6td2Fmjp5KUxn8M0k7dQXtoNCTDk"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are an automated data extraction assistant for a gym tracker. Analyze this raw voice-to-text transcription and extract the exercise name, weight, reps, sets, and calculated total volume.\\n\\n\" +\n          \"STRICT EXERCISE MAPPING RULES:\\n\" +\n          \"- If they mention 'inclined' or 'incline', output 'Inclined Bench Press' and Category 'upper'.\\n\" +\n          \"- Match other exercises cleanly (e.g., 'Bench Press', 'Squat', 'Deadlift', 'Bicep Curl') and assign a category ('upper', 'lower', 'arms', 'core').\\n\\n\" +\n          \"CRITICAL: Output ONLY a raw, valid JSON object. Do not wrap it in markdown block formatting like ```json.\\n\\n\" +\n          \"Transcription: \\\"\" + $json.text + \"\\\"\\n\\n\" +\n          \"Expected JSON format output:\\n\" +\n          \"{\\n\" +\n          \"  \\\"Exercise\\\": \\\"Clean Exercise Name\\\",\\n\" +\n          \"  \\\"Weight\\\": 0,\\n\" +\n          \"  \\\"Reps\\\": 0,\\n\" +\n          \"  \\\"Sets\\\": 0,\\n\" +\n          \"  \\\"Volume\\\": 0,\\n\" +\n          \"  \\\"Category\\\": \\\"upper/lower/arms/core\\\"\\n\" +\n          \"}\"\n        }\n      ]\n    }\n  ]\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1488,
+        1040
+      ],
+      "id": "b24fed6e-2cff-4d6b-9221-ec9e814d7118",
+      "name": "HTTP Request7"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Grab the raw text block coming from your Gemini AI cleaner node\nconst rawText = $('HTTP Request7').item.json.candidates[0].content.parts[0].text;\n\n// 2. Clean out any random markdown block formatting if Gemini included it\nconst cleanJsonString = rawText.replace(/```json/g, '').replace(/```/g, '').trim();\n\n// 3. Convert the text into an actual selectable n8n object\nconst parsedData = JSON.parse(cleanJsonString);\n\n// 4. Safety Check: If the exercise string contains only numbers (like \"9, 20\"), give it a safe fallback\nlet exerciseName = String(parsedData.Exercise || \"Unknown Exercise\").trim();\nif (/^[0-9,\\s.]+$/.test(exerciseName)) {\n  exerciseName = \"Unknown Exercise\";\n}\n\n// 5. Output clean, predictable data types\nreturn {\n  Exercise: exerciseName,\n  Weight: parseFloat(parsedData.Weight || 0),\n  Reps: parseInt(parsedData.Reps || 0),\n  Sets: parseInt(parsedData.Sets || 0),\n  Volume: parseFloat(parsedData.Volume || 0),\n  Category: parsedData.Category || \"unknown\"\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        1264
+      ],
+      "id": "86fdafce-38c8-4708-a160-0973a0849336",
+      "name": "Code in JavaScript9"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ",
+          "mode": "list",
+          "cachedResultName": "AI workout tracking system by erinx",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Logs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1MfDDWbITORc1rDeb8sMMwLshxgme8RyYVn2KUVqftBQ/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": []
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "detectAutomatically"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        368,
+        1440
+      ],
+      "id": "e108b6e6-c173-4468-9a52-ff2b629e4c16",
+      "name": "Get row(s) in sheet3",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LTxXRSJawEseaMEc",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "AIzaSyAL_f4m4H_hUXSgnmEGJ1dlq6zwjiPagQU"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"You are an elite AI Fitness Analyst bot. The user has requested a summary report of their gym progress and gains. Analyze the raw workout spreadsheet history array provided below and format an inspiring, high-energy progress summary.\\n\\n\" +\n          \"Your summary must include:\\n\" +\n          \"1. Total volume milestones reached overall.\\n\" +\n          \"2. A breakdown of their top lifts (max weight) by exercise found in the log.\\n\" +\n          \"3. Highlight consistency or changes in their sets/reps.\\n\" +\n          \"4. Close out with a massively hyped, energetic coaching sign-off! 🏋️‍♂️🔥💪\\n\\n\" +\n          \"CRITICAL FORMATTING RULE: Do NOT use markdown syntax (like **bold** or *italics*). Instead, use basic HTML tags for styling: use <b>text</b> for bold sections, and <br> for new lines.\\n\\n\" +\n          \"RAW SHEET HISTORY DATA:\\n\" + \n          JSON.stringify($input.all().map(item => item.json))\n        }\n      ]\n    }\n  ]\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        528,
+        1440
+      ],
+      "id": "147f52bf-4096-4350-bb0a-4fff116098df",
+      "name": "HTTP Request8",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger2').item.json.message.chat.id }}",
+        "text": "={{ $json.candidates[0].content.parts[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        704,
+        1440
+      ],
+      "id": "5d2e94f4-c74c-4b1b-8b27-8d5038ee0ee0",
+      "name": "Send a text message4",
+      "webhookId": "ff8ebee6-d7a4-47fb-b65c-d7085c1ba624",
+      "credentials": {
+        "telegramApi": {
+          "id": "KVVVGpNb41kqXFcO",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Get a file1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s) in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request5": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request6": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript8": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request7": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript9": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request8": {
+      "main": [
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "857f11b3-0aaa-41d7-82f8-3d581a78fec1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "926c9aa78ca1c349117cf429060facb83dd36da60b339d9af7f08fb5588ab226"
+  },
+  "id": "qLR0tVIpVy0b5ete",
+  "tags": []
+}
